@@ -1,4 +1,12 @@
-//! Hollow Archive — headless CLI (M2). The egui UI lands in M4.
+//! Hollow Archive — Zenless Zone Zero inventory exporter.
+//! GUI by default; `--headless` for the CLI used in development and bug reports.
+
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+mod admin;
+mod app;
+mod capture;
+mod theme;
 
 use std::path::PathBuf;
 
@@ -6,102 +14,160 @@ use anyhow::{bail, Context, Result};
 use clap::Parser;
 use hollow_proto::export::{export, ExportSettings};
 use hollow_proto::gamedata::GameData;
-use hollow_proto::model::PlayerData;
-use hollow_proto::{fixture, Event, Pipeline, SessionState};
+use hollow_proto::{Event, SessionState};
+
+use crate::capture::{Accumulator, CaptureConfig, CaptureEvent, CaptureSession, Source};
 
 #[derive(Parser, Debug)]
 #[command(name = "hollow-archive", version, about)]
 struct Cli {
-    /// Game region: Europe, America, Asia, or "TW,HK,MO".
-    #[arg(long, default_value = "America")]
-    region: String,
+    /// Game region: Europe, America, Asia, or "TW,HK,MO". Remembered by the GUI.
+    #[arg(long)]
+    region: Option<String>,
 
     /// Replay a recording (.pcapng from pktmon/Wireshark, or zzz_packet_capture's .json)
     /// instead of capturing live.
     #[arg(long)]
     fixture: Option<PathBuf>,
 
-    /// Write the Zenless Optimizer JSON here ("-" for stdout).
+    /// Save every game datagram seen during the session to this pcapng (for bug reports).
+    #[arg(long)]
+    record: Option<PathBuf>,
+
+    /// Run without the GUI; print progress to stderr and exit when done.
+    #[arg(long)]
+    headless: bool,
+
+    /// Headless: write the Zenless Optimizer JSON here ("-" for stdout).
     #[arg(long, short)]
     output: Option<PathBuf>,
 
-    /// Print every pipeline event as it happens.
+    /// Headless: print every pipeline event.
     #[arg(long, short)]
     verbose: bool,
 
     /// Pad every disc to four substats with empty keys, like zzz_packet_capture.
     #[arg(long)]
     pad_substats: bool,
+
+    /// Do not try to relaunch as administrator.
+    #[arg(long)]
+    no_admin: bool,
 }
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
-    let Some(path) = &cli.fixture else {
-        bail!("live capture is not implemented yet; pass --fixture <file.pcapng>");
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::from_default_env().add_directive("hollow_archive=info".parse()?),
+        )
+        .with_writer(std::io::stderr)
+        .init();
+
+    let needs_capture = cli.fixture.is_none();
+    if needs_capture && !cli.no_admin && !admin::is_elevated() {
+        if let Err(e) = admin::relaunch_elevated() {
+            tracing::warn!("could not relaunch elevated: {e:#}");
+        }
+    }
+
+    if cli.headless {
+        headless(cli)
+    } else {
+        gui(cli)
+    }
+}
+
+fn gui(cli: Cli) -> Result<()> {
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size([440.0, 700.0])
+            .with_min_inner_size([380.0, 520.0])
+            .with_title("Hollow Archive"),
+        ..Default::default()
     };
+    eframe::run_native(
+        "Hollow Archive",
+        options,
+        Box::new(move |cc| Ok(Box::new(app::App::new(cc, cli.region, cli.fixture, cli.record)))),
+    )
+    .map_err(|e| anyhow::anyhow!("{e}"))
+}
 
-    let packets = fixture::read(path).with_context(|| format!("reading {}", path.display()))?;
-    eprintln!("{}: {} game datagrams", path.display(), packets.len());
-
-    let mut pipeline = Pipeline::for_region(&cli.region)?;
-    let mut data = PlayerData::default();
+fn headless(cli: Cli) -> Result<()> {
+    let region = cli.region.unwrap_or_else(|| "America".into());
+    let source = match &cli.fixture {
+        Some(p) => Source::Fixture(p.clone()),
+        #[cfg(windows)]
+        None => Source::Pktmon,
+        #[cfg(not(windows))]
+        None => bail!("live capture is only supported on Windows; pass --fixture"),
+    };
+    eprintln!("region {region}, source {source:?}");
+    let session = CaptureSession::start(CaptureConfig {
+        region,
+        source,
+        record_to: cli.record,
+    });
+    let mut acc = Accumulator::default();
+    let mut state = SessionState::Initial;
     let mut warnings = 0usize;
-    for p in &packets {
-        for ev in pipeline.feed(&p.payload, p.direction, p.unix_secs()) {
-            match &ev {
-                Event::ServerKeyFound => eprintln!("[t={}] server_rand_key found", p.unix_secs()),
+
+    for ev in session.events.iter() {
+        match ev {
+            CaptureEvent::Listening => eprintln!("listening on UDP {}", hollow_proto::GAME_PORT),
+            CaptureEvent::GameTrafficSeen => eprintln!("game traffic detected"),
+            CaptureEvent::Progress { datagrams } => {
+                if cli.verbose {
+                    eprintln!("{datagrams} datagrams");
+                }
+            }
+            CaptureEvent::Pipeline(ev) => match &ev {
+                Event::ServerKeyFound => {
+                    state = SessionState::HaveServerKey;
+                    eprintln!("server_rand_key found");
+                }
                 Event::SessionEstablished { clock_delta } => {
-                    eprintln!(
-                        "[t={}] session established (clock delta {clock_delta:+}s)",
-                        p.unix_secs()
-                    )
-                }
-                Event::Agents(v) => {
-                    eprintln!("[t={}] {} agents", p.unix_secs(), v.len());
-                    data.agents.extend(v.iter().cloned());
-                }
-                Event::WEngines(v) => {
-                    eprintln!("[t={}] {} w-engines", p.unix_secs(), v.len());
-                    data.wengines.extend(v.iter().cloned());
-                }
-                Event::Discs(v) => {
-                    eprintln!("[t={}] {} drive discs", p.unix_secs(), v.len());
-                    data.discs.extend(v.iter().cloned());
+                    state = SessionState::Established;
+                    eprintln!("session established (clock delta {clock_delta:+}s)");
                 }
                 Event::UnhandledCommand { cmd_id, len } => {
                     if cli.verbose {
-                        eprintln!("[t={}] cmd {cmd_id} ({len} bytes)", p.unix_secs());
+                        eprintln!("cmd {cmd_id} ({len} bytes)");
                     }
                 }
                 Event::Warning(w) => {
                     warnings += 1;
                     if cli.verbose || warnings <= 5 {
-                        eprintln!("[t={}] warning: {w}", p.unix_secs());
+                        eprintln!("warning: {w}");
                     }
                 }
-            }
+                data => {
+                    acc.absorb(data);
+                    let d = &acc.data;
+                    eprintln!(
+                        "inventory: {} agents, {} w-engines, {} discs",
+                        d.agents.len(),
+                        d.wengines.len(),
+                        d.discs.len()
+                    );
+                    if acc.complete() {
+                        session.request_stop();
+                    }
+                }
+            },
+            CaptureEvent::Recorded(p) => eprintln!("recording written to {}", p.display()),
+            CaptureEvent::Error(e) => eprintln!("error: {e}"),
+            CaptureEvent::Stopped => break,
         }
     }
 
-    let stats = pipeline.stats();
-    eprintln!(
-        "done: state={:?} datagrams={} messages={} undecodable={} kcp_gaps={} warnings={}",
-        pipeline.state(),
-        stats.datagrams,
-        stats.messages,
-        stats.undecodable,
-        stats.kcp_gaps,
-        warnings
-    );
-    eprintln!(
-        "captured: {} agents, {} w-engines, {} discs",
-        data.agents.len(),
-        data.wengines.len(),
-        data.discs.len()
-    );
-
-    if pipeline.state() != SessionState::Established {
-        bail!("session key was never derived — wrong region, or the recording does not include the login handshake");
+    eprintln!("done: state={state:?} warnings={warnings}");
+    if state != SessionState::Established {
+        bail!("session key was never derived — wrong region, or the login handshake was not observed");
+    }
+    if !acc.complete() {
+        eprintln!("warning: partial capture (missing agents, w-engines or discs)");
     }
 
     if let Some(out) = &cli.output {
@@ -109,8 +175,7 @@ fn main() -> Result<()> {
             pad_substats: cli.pad_substats,
             ..Default::default()
         };
-        let zod = export(&data, &GameData::vendored(), &settings);
-        let json = serde_json::to_string_pretty(&zod)?;
+        let json = serde_json::to_string_pretty(&export(&acc.data, &GameData::vendored(), &settings))?;
         if out.as_os_str() == "-" {
             println!("{json}");
         } else {
