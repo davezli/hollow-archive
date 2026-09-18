@@ -1,0 +1,739 @@
+{
+ "characters": {
+  "1011": {
+   "en": "Anby",
+   "rank": 3
+  },
+  "1021": {
+   "en": "Nekomata",
+   "rank": 4
+  },
+  "1031": {
+   "en": "Nicole",
+   "rank": 3
+  },
+  "1041": {
+   "en": "Soldier 11",
+   "rank": 4
+  },
+  "1051": {
+   "en": "Yidhari",
+   "rank": 4
+  },
+  "1061": {
+   "en": "Corin",
+   "rank": 3
+  },
+  "1071": {
+   "en": "Caesar",
+   "rank": 4
+  },
+  "1081": {
+   "en": "Billy",
+   "rank": 3
+  },
+  "1091": {
+   "en": "Miyabi",
+   "rank": 4
+  },
+  "1101": {
+   "en": "Koleda",
+   "rank": 4
+  },
+  "1111": {
+   "en": "Anton",
+   "rank": 3
+  },
+  "1121": {
+   "en": "Ben",
+   "rank": 3
+  },
+  "1131": {
+   "en": "Soukaku",
+   "rank": 3
+  },
+  "1141": {
+   "en": "Lycaon",
+   "rank": 4
+  },
+  "1151": {
+   "en": "Lucy",
+   "rank": 3
+  },
+  "1161": {
+   "en": "Lighter",
+   "rank": 4
+  },
+  "1171": {
+   "en": "Burnice",
+   "rank": 4
+  },
+  "1181": {
+   "en": "Grace",
+   "rank": 4
+  },
+  "1191": {
+   "en": "Ellen",
+   "rank": 4
+  },
+  "1201": {
+   "en": "Harumasa",
+   "rank": 4
+  },
+  "1211": {
+   "en": "Rina",
+   "rank": 4
+  },
+  "1221": {
+   "en": "Yanagi",
+   "rank": 4
+  },
+  "1241": {
+   "en": "Zhu Yuan",
+   "rank": 4
+  },
+  "1251": {
+   "en": "Qingyi",
+   "rank": 4
+  },
+  "1261": {
+   "en": "Jane",
+   "rank": 4
+  },
+  "1271": {
+   "en": "Seth",
+   "rank": 3
+  },
+  "1281": {
+   "en": "Piper",
+   "rank": 3
+  },
+  "1291": {
+   "en": "Hugo",
+   "rank": 4
+  },
+  "1301": {
+   "en": "Orphie & Magus",
+   "rank": 4
+  },
+  "1311": {
+   "en": "Astra Yao",
+   "rank": 4
+  },
+  "1321": {
+   "en": "Evelyn",
+   "rank": 4
+  },
+  "1331": {
+   "en": "Vivian",
+   "rank": 4
+  },
+  "1341": {
+   "en": "Zhao",
+   "rank": 4
+  },
+  "1351": {
+   "en": "Pulchra",
+   "rank": 3
+  },
+  "1361": {
+   "en": "Trigger",
+   "rank": 4
+  },
+  "1371": {
+   "en": "Yixuan",
+   "rank": 4
+  },
+  "1381": {
+   "en": "Soldier 0 - Anby",
+   "rank": 4
+  },
+  "1391": {
+   "en": "Ju Fufu",
+   "rank": 4
+  },
+  "1401": {
+   "en": "Alice",
+   "rank": 4
+  },
+  "1411": {
+   "en": "Yuzuha",
+   "rank": 4
+  },
+  "1421": {
+   "en": "Pan Yinhu",
+   "rank": 3
+  },
+  "1431": {
+   "en": "Ye Shunguang",
+   "rank": 4
+  },
+  "1441": {
+   "en": "Manato",
+   "rank": 3
+  },
+  "1451": {
+   "en": "Lucia",
+   "rank": 4
+  },
+  "1461": {
+   "en": "Seed",
+   "rank": 4
+  },
+  "1471": {
+   "en": "Banyue",
+   "rank": 4
+  },
+  "1481": {
+   "en": "Dialyn",
+   "rank": 4
+  },
+  "1491": {
+   "en": "Sunna",
+   "rank": 4
+  },
+  "1501": {
+   "en": "Aria",
+   "rank": 4
+  },
+  "1511": {
+   "en": "Nangong Yu",
+   "rank": 4
+  },
+  "1521": {
+   "en": "Cissia",
+   "rank": 4
+  },
+  "1531": {
+   "en": "Starlight - Billy",
+   "rank": 4
+  },
+  "1541": {
+   "en": "Promeia",
+   "rank": 4
+  },
+  "1551": {
+   "en": "Pyrois",
+   "rank": 4
+  },
+  "1561": {
+   "en": "Velina",
+   "rank": 4
+  },
+  "1571": {
+   "en": "Norma",
+   "rank": 4
+  },
+  "1581": {
+   "en": "Remielle",
+   "rank": 4
+  },
+  "1591": {
+   "en": "Sigrid",
+   "rank": 4
+  },
+  "1611": {
+   "en": "Claret",
+   "rank": 4
+  },
+  "1621": {
+   "en": "Roxy",
+   "rank": 4
+  }
+ },
+ "equipment": {
+  "31000": {
+   "en": "Woodpecker Electro"
+  },
+  "31100": {
+   "en": "Puffer Electro"
+  },
+  "31200": {
+   "en": "Shockstar Disco"
+  },
+  "31300": {
+   "en": "Freedom Blues"
+  },
+  "31400": {
+   "en": "Hormone Punk"
+  },
+  "31500": {
+   "en": "Soul Rock"
+  },
+  "31600": {
+   "en": "Swing Jazz"
+  },
+  "31800": {
+   "en": "Chaos Jazz"
+  },
+  "31900": {
+   "en": "Proto Punk"
+  },
+  "32200": {
+   "en": "Inferno Metal"
+  },
+  "32300": {
+   "en": "Chaotic Metal"
+  },
+  "32400": {
+   "en": "Thunder Metal"
+  },
+  "32500": {
+   "en": "Polar Metal"
+  },
+  "32600": {
+   "en": "Fanged Metal"
+  },
+  "32700": {
+   "en": "Branch & Blade Song"
+  },
+  "32800": {
+   "en": "Astral Voice"
+  },
+  "32900": {
+   "en": "Shadow Harmony"
+  },
+  "33000": {
+   "en": "Phaethon's Melody"
+  },
+  "33100": {
+   "en": "Yunkui Tales"
+  },
+  "33200": {
+   "en": "King of the Summit"
+  },
+  "33300": {
+   "en": "Dawn's Bloom"
+  },
+  "33400": {
+   "en": "Moonlight Lullaby"
+  },
+  "33500": {
+   "en": "White Water Ballad"
+  },
+  "33600": {
+   "en": "Shining Aria"
+  },
+  "33700": {
+   "en": "Bunny in Wonderland"
+  },
+  "33800": {
+   "en": "Notes From the Chained"
+  },
+  "33900": {
+   "en": "Wuthering Salon"
+  },
+  "34000": {
+   "en": "The Sky Ablaze"
+  },
+  "34100": {
+   "en": "Feathered Fate"
+  },
+  "34200": {
+   "en": "Thorned Rose"
+  }
+ },
+ "version": "3.2",
+ "weapons": {
+  "12001": {
+   "en": "[Lunar] Pleniluna",
+   "rank": 2
+  },
+  "12002": {
+   "en": "[Lunar] Decrescent",
+   "rank": 2
+  },
+  "12003": {
+   "en": "[Lunar] Noviluna",
+   "rank": 2
+  },
+  "12004": {
+   "en": "[Reverb] Mark I",
+   "rank": 2
+  },
+  "12005": {
+   "en": "[Reverb] Mark II",
+   "rank": 2
+  },
+  "12006": {
+   "en": "[Reverb] Mark III",
+   "rank": 2
+  },
+  "12007": {
+   "en": "[Vortex] Revolver",
+   "rank": 2
+  },
+  "12008": {
+   "en": "[Vortex] Arrow",
+   "rank": 2
+  },
+  "12009": {
+   "en": "[Vortex] Hatchet",
+   "rank": 2
+  },
+  "12010": {
+   "en": "[Magnetic Storm] Alpha",
+   "rank": 2
+  },
+  "12011": {
+   "en": "[Magnetic Storm] Bravo",
+   "rank": 2
+  },
+  "12012": {
+   "en": "[Magnetic Storm] Charlie",
+   "rank": 2
+  },
+  "12013": {
+   "en": "[Identity] Base",
+   "rank": 2
+  },
+  "12014": {
+   "en": "[Identity] Inflection",
+   "rank": 2
+  },
+  "12015": {
+   "en": "[Cinder] Cobalt",
+   "rank": 2
+  },
+  "12016": {
+   "en": "[Lunar] Semiluna",
+   "rank": 2
+  },
+  "13001": {
+   "en": "Street Superstar",
+   "rank": 3
+  },
+  "13002": {
+   "en": "Slice of Time",
+   "rank": 3
+  },
+  "13003": {
+   "en": "Rainforest Gourmet",
+   "rank": 3
+  },
+  "13004": {
+   "en": "Starlight Engine",
+   "rank": 3
+  },
+  "13005": {
+   "en": "Steam Oven",
+   "rank": 3
+  },
+  "13006": {
+   "en": "Precious Fossilized Core",
+   "rank": 3
+  },
+  "13007": {
+   "en": "Original Transmorpher",
+   "rank": 3
+  },
+  "13008": {
+   "en": "Weeping Gemini",
+   "rank": 3
+  },
+  "13009": {
+   "en": "Electro-Lip Gloss",
+   "rank": 3
+  },
+  "13010": {
+   "en": "Bunny Band",
+   "rank": 3
+  },
+  "13011": {
+   "en": "Spring Embrace",
+   "rank": 3
+  },
+  "13012": {
+   "en": "Puzzle Sphere",
+   "rank": 3
+  },
+  "13013": {
+   "en": "Gilded Blossom",
+   "rank": 3
+  },
+  "13014": {
+   "en": "Radiowave Journey",
+   "rank": 3
+  },
+  "13015": {
+   "en": "Marcato Desire",
+   "rank": 3
+  },
+  "13016": {
+   "en": "Reel Projector",
+   "rank": 3
+  },
+  "13017": {
+   "en": "Catty Luck",
+   "rank": 3
+  },
+  "13018": {
+   "en": "Boisterous Echoes",
+   "rank": 3
+  },
+  "13019": {
+   "en": "Cauldron of Clarity",
+   "rank": 3
+  },
+  "13020": {
+   "en": "The Simmering Pot",
+   "rank": 3
+  },
+  "13021": {
+   "en": "Bloodmarrow Coffer",
+   "rank": 3
+  },
+  "13101": {
+   "en": "Demara Battery Mark II",
+   "rank": 3
+  },
+  "13103": {
+   "en": "The Vault",
+   "rank": 3
+  },
+  "13106": {
+   "en": "Housekeeper",
+   "rank": 3
+  },
+  "13108": {
+   "en": "Starlight Engine Replica",
+   "rank": 3
+  },
+  "13111": {
+   "en": "Drill Rig - Red Axis",
+   "rank": 3
+  },
+  "13112": {
+   "en": "Big Cylinder",
+   "rank": 3
+  },
+  "13113": {
+   "en": "Bashful Demon",
+   "rank": 3
+  },
+  "13115": {
+   "en": "Kaboom the Cannon",
+   "rank": 3
+  },
+  "13127": {
+   "en": "Peacekeeper - Specialized",
+   "rank": 3
+  },
+  "13128": {
+   "en": "Roaring Ride",
+   "rank": 3
+  },
+  "13135": {
+   "en": "Box Cutter",
+   "rank": 3
+  },
+  "13142": {
+   "en": "Tremor Trigram Vessel",
+   "rank": 3
+  },
+  "13144": {
+   "en": "Grill O'Wisp",
+   "rank": 3
+  },
+  "14001": {
+   "en": "Cannon Rotor",
+   "rank": 3
+  },
+  "14002": {
+   "en": "Unfettered Game Ball",
+   "rank": 3
+  },
+  "14003": {
+   "en": "Six Shooter",
+   "rank": 3
+  },
+  "14102": {
+   "en": "Steel Cushion",
+   "rank": 4
+  },
+  "14104": {
+   "en": "The Brimstone",
+   "rank": 4
+  },
+  "14105": {
+   "en": "Kraken's Cradle",
+   "rank": 4
+  },
+  "14107": {
+   "en": "Tusks of Fury",
+   "rank": 4
+  },
+  "14109": {
+   "en": "Hailstorm Shrine",
+   "rank": 4
+  },
+  "14110": {
+   "en": "Hellfire Gears",
+   "rank": 4
+  },
+  "14114": {
+   "en": "The Restrained",
+   "rank": 4
+  },
+  "14116": {
+   "en": "Blazing Laurel",
+   "rank": 4
+  },
+  "14117": {
+   "en": "Flamemaker Shaker",
+   "rank": 4
+  },
+  "14118": {
+   "en": "Fusion Compiler",
+   "rank": 4
+  },
+  "14119": {
+   "en": "Deep Sea Visitor",
+   "rank": 4
+  },
+  "14120": {
+   "en": "Zanshin Herb Case",
+   "rank": 4
+  },
+  "14121": {
+   "en": "Weeping Cradle",
+   "rank": 4
+  },
+  "14122": {
+   "en": "Timeweaver",
+   "rank": 4
+  },
+  "14124": {
+   "en": "Riot Suppressor Mark VI",
+   "rank": 4
+  },
+  "14125": {
+   "en": "Ice-Jade Teapot",
+   "rank": 4
+  },
+  "14126": {
+   "en": "Sharpened Stinger",
+   "rank": 4
+  },
+  "14129": {
+   "en": "Myriad Eclipse",
+   "rank": 4
+  },
+  "14130": {
+   "en": "Bellicose Blaze",
+   "rank": 4
+  },
+  "14131": {
+   "en": "Elegant Vanity",
+   "rank": 4
+  },
+  "14132": {
+   "en": "Heartstring Nocturne",
+   "rank": 4
+  },
+  "14133": {
+   "en": "Flight of Fancy",
+   "rank": 4
+  },
+  "14134": {
+   "en": "Half-Sugar Bunny",
+   "rank": 4
+  },
+  "14136": {
+   "en": "Spectral Gaze",
+   "rank": 4
+  },
+  "14137": {
+   "en": "Qingming Birdcage",
+   "rank": 4
+  },
+  "14138": {
+   "en": "Severed Innocence",
+   "rank": 4
+  },
+  "14139": {
+   "en": "Roaring Fur-nace",
+   "rank": 4
+  },
+  "14140": {
+   "en": "Practiced Perfection",
+   "rank": 4
+  },
+  "14141": {
+   "en": "Metanukimorphosis",
+   "rank": 4
+  },
+  "14143": {
+   "en": "Cloudcleave Radiance",
+   "rank": 4
+  },
+  "14145": {
+   "en": "Dreamlit Hearth",
+   "rank": 4
+  },
+  "14146": {
+   "en": "Cordis Germina",
+   "rank": 4
+  },
+  "14147": {
+   "en": "Wrathful Vajra",
+   "rank": 4
+  },
+  "14148": {
+   "en": "Yesterday Calls",
+   "rank": 4
+  },
+  "14149": {
+   "en": "Thoughtbop",
+   "rank": 4
+  },
+  "14150": {
+   "en": "Angel in the Shell",
+   "rank": 4
+  },
+  "14151": {
+   "en": "Neon Fantasies",
+   "rank": 4
+  },
+  "14152": {
+   "en": "Serpentine Seeker",
+   "rank": 4
+  },
+  "14153": {
+   "en": "Starlight Rider Faceplate",
+   "rank": 4
+  },
+  "14154": {
+   "en": "Frostfall Sickle",
+   "rank": 4
+  },
+  "14155": {
+   "en": "Sol Exuvia",
+   "rank": 4
+  },
+  "14156": {
+   "en": "Joyau Dore",
+   "rank": 4
+  },
+  "14157": {
+   "en": "Chief Sidekick",
+   "rank": 4
+  },
+  "14158": {
+   "en": "Ode of Resurrected Wings",
+   "rank": 4
+  },
+  "14159": {
+   "en": "Knight's Extolment",
+   "rank": 4
+  },
+  "14161": {
+   "en": "Crimson Thirst",
+   "rank": 4
+  },
+  "14162": {
+   "en": "Crimson Moon Casket",
+   "rank": 4
+  }
+ }
+}

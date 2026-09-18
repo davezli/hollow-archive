@@ -1,0 +1,57 @@
+{
+    "xorSeeds": {
+        "Europe": "9543521FC9C8CAED",
+        "America": "50C21982AC009AF2",
+        "Asia": "1A7E69FE2F49590A",
+        "TW,HK,MO": "883B27204BF725D3"
+    },
+    "cmdPlayerGetTokenScRsp": 4937,
+    "cmdGetEquipDataScRsp": 3933,
+    "cmdGetWeaponDataScRsp": 1382,
+    "cmdGetAvatarDataScRsp": 2470,
+    "agentData": {
+        "agents": 2
+    },
+    "agentInfo": {
+        "id": 2,
+        "level": 3,
+        "promotion": 14,
+        "weaponUid": 12,
+        "mindscape": 7,
+        "skills": 4,
+        "dressed_equips": 5
+    },
+    "agentSkill": {
+        "skill_type": 1,
+        "level": 9
+    },
+    "agentEquip": {
+        "uid": 15,
+        "slot": 10
+    },
+    "equipData": {
+        "discs": 5
+    },
+    "discInfo": {
+        "uid": 14,
+        "id": 6,
+        "level": 1,
+        "mainStat": 9,
+        "subStats": 4
+    },
+    "discStat": {
+        "key": 3,
+        "base_value": 13,
+        "add_value": 7
+    },
+    "weaponData": {
+        "weapons": 11
+    },
+    "weaponInfo": {
+        "id": 13,
+        "uid": 6,
+        "level": 1,
+        "phase": 12,
+        "modification": 2
+    }
+}

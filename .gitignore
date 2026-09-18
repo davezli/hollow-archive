@@ -1,0 +1,6 @@
+/target
+*.pcapng
+*.etl
+captured_packets.json
+/crates/hollow-proto/tests/fixtures/*.pcapng
+/crates/hollow-proto/tests/fixtures/*.expect.json

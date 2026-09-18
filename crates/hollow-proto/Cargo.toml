@@ -1,0 +1,17 @@
+[package]
+name = "hollow-proto"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Zenless Zone Zero login-traffic decoder (KCP + XOR pad + protobuf wire) ported from zzz_packet_capture"
+
+[dependencies]
+base64 = "0.22"
+rsa = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+
+[dev-dependencies]
+proptest = "1"
