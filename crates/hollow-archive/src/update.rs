@@ -73,3 +73,26 @@ pub fn install_in_background() -> Receiver<AppUpdate> {
     });
     rx
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Hits api.github.com; run with `cargo test -p hollow-archive -- --ignored`.
+    #[test]
+    #[ignore]
+    fn latest_release_resolves() {
+        let latest = configured().unwrap().get_latest_release().unwrap();
+        assert!(!latest.version.is_empty());
+        let target = self_update::get_target();
+        assert!(
+            latest.assets.iter().any(|a| a.name.contains(target)),
+            "no asset for {target}: {:?}",
+            latest.assets
+        );
+        assert!(matches!(
+            check().unwrap(),
+            AppUpdate::UpToDate | AppUpdate::Available(_)
+        ));
+    }
+}
