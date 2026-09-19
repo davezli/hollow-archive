@@ -19,6 +19,12 @@ whose `datamine.json` / `nap.json` we also consume. App shell modelled on
    Zenless Optimizer's import.
 
 Windows 10/11 only. Uses the built-in `pktmon` driver, so no Npcap install.
+Data files (packet schema, ID→name tables) update in-app when a new game version
+ships upstream; the footer shows an **Update** button when one is available.
+
+The hero art (`crates/hollow-archive/assets/hero.png`, the Inter-Knot "A new
+Hollow on Fourteenth Street" post) is a ZZZ/Wikia asset and is not committed;
+without it the app draws a plain backdrop. Confirm licensing before shipping it.
 
 ## Develop
 
@@ -38,5 +44,11 @@ cargo run -p hollow-archive -- --headless --region America --fixture zzz-login.p
 cargo run -p hollow-archive -- --fixture zzz-login.pcapng          # same, in the GUI
 cargo test --workspace                                              # drop the pcapng in crates/hollow-proto/tests/fixtures/ to enable replay tests
 ```
+
+### Npcap fallback
+
+`cargo build -p hollow-archive --features pcap` adds an Npcap backend (`--capture-backend pcap`,
+or the Backend row in capture settings). Building it needs the
+[Npcap SDK](https://npcap.com/#download): set `LIB=<sdk>\Libd` first. Running it needs Npcap installed.
 
 See `specs/` for the design, protocol notes and test plan.

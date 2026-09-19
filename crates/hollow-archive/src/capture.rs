@@ -13,6 +13,8 @@ use hollow_proto::fixture::{self, Packet};
 use hollow_proto::model::PlayerData;
 use hollow_proto::{Direction, Event, Pipeline};
 
+use crate::datafiles::DataSet;
+
 /// What the capture thread tells the UI.
 #[derive(Debug)]
 pub enum CaptureEvent {
@@ -32,19 +34,26 @@ pub enum CaptureEvent {
     Stopped,
 }
 
-#[derive(Debug, Clone)]
-pub enum Source {
-    #[cfg(windows)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum, serde::Serialize, serde::Deserialize)]
+pub enum Backend {
+    /// Windows built-in packet monitor; no driver install needed.
     Pktmon,
-    Fixture(PathBuf),
+    /// libpcap / Npcap (requires the `pcap` build feature and Npcap installed).
+    Pcap,
 }
 
 #[derive(Debug, Clone)]
+pub enum Source {
+    Live(Backend),
+    Fixture(PathBuf),
+}
+
 pub struct CaptureConfig {
     pub region: String,
     pub source: Source,
     /// Write every game datagram seen to this pcapng when the session ends.
     pub record_to: Option<PathBuf>,
+    pub data: Arc<DataSet>,
 }
 
 pub struct CaptureSession {
@@ -93,7 +102,8 @@ impl Drop for CaptureSession {
 }
 
 fn run(config: CaptureConfig, tx: &Sender<CaptureEvent>, stop: &AtomicBool) -> Result<()> {
-    let mut pipeline = Pipeline::for_region(&config.region)?;
+    let seed = config.data.datamine.region_seed(&config.region)?;
+    let mut pipeline = Pipeline::new(seed, config.data.datamine.clone(), config.data.schema()?);
     let mut recorded: Vec<Packet> = Vec::new();
     let mut datagrams = 0u64;
     let mut seen_game = false;
@@ -132,9 +142,17 @@ fn run(config: CaptureConfig, tx: &Sender<CaptureEvent>, stop: &AtomicBool) -> R
                 }
             }
         }
-        #[cfg(windows)]
-        Source::Pktmon => {
+        Source::Live(Backend::Pktmon) => {
+            #[cfg(windows)]
             live_pktmon(tx, stop, &mut on_packet)?;
+            #[cfg(not(windows))]
+            anyhow::bail!("pktmon is Windows-only; use --capture-backend pcap");
+        }
+        Source::Live(Backend::Pcap) => {
+            #[cfg(feature = "pcap")]
+            live_pcap(tx, stop, &mut on_packet)?;
+            #[cfg(not(feature = "pcap"))]
+            anyhow::bail!("this build has no pcap support (build with --features pcap)");
         }
     }
 
@@ -203,6 +221,51 @@ fn live_pktmon(
     let _ = capture.stop();
     let _ = capture.unload();
     result
+}
+
+#[cfg(feature = "pcap")]
+fn live_pcap(
+    tx: &Sender<CaptureEvent>,
+    stop: &AtomicBool,
+    on_packet: &mut dyn FnMut(&[u8], Direction, Duration) -> bool,
+) -> Result<()> {
+    use hollow_proto::frame;
+
+    let device = pcap::Device::lookup()
+        .map_err(|e| anyhow!("pcap: {e} (is Npcap installed?)"))?
+        .ok_or_else(|| anyhow!("pcap: no capture device found (is Npcap installed?)"))?;
+    let mut cap = pcap::Capture::from_device(device)
+        .map_err(|e| anyhow!("pcap: {e}"))?
+        .immediate_mode(true)
+        .timeout(200)
+        .open()
+        .map_err(|e| anyhow!("pcap: opening device: {e}"))?;
+    cap.filter(&format!("udp port {}", hollow_proto::GAME_PORT), true)
+        .map_err(|e| anyhow!("pcap filter: {e}"))?;
+    let link = cap.get_datalink();
+    let _ = tx.send(CaptureEvent::Listening);
+
+    while !stop.load(Ordering::Relaxed) {
+        let pkt = match cap.next_packet() {
+            Ok(p) => p,
+            Err(pcap::Error::TimeoutExpired) => continue,
+            Err(e) => anyhow::bail!("pcap: {e}"),
+        };
+        let udp = match link {
+            pcap::Linktype::ETHERNET => frame::ethernet(pkt.data),
+            pcap::Linktype::NULL | pcap::Linktype::LOOP => pkt.data.get(4..).and_then(frame::ip),
+            _ => frame::ip(pkt.data),
+        };
+        let Some(udp) = udp else { continue };
+        let Some(dir) = Direction::from_ports(udp.src_port, udp.dst_port) else {
+            continue;
+        };
+        let ts = Duration::new(pkt.header.ts.tv_sec as u64, (pkt.header.ts.tv_usec as u32) * 1000);
+        if !on_packet(udp.payload, dir, ts) {
+            break;
+        }
+    }
+    Ok(())
 }
 
 /// Accumulates pipeline data events into player data (shared by CLI and UI).

@@ -4,3 +4,4 @@
 captured_packets.json
 /crates/hollow-proto/tests/fixtures/*.pcapng
 /crates/hollow-proto/tests/fixtures/*.expect.json
+/crates/hollow-archive/assets/hero.png

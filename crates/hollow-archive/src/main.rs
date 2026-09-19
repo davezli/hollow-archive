@@ -6,6 +6,7 @@
 mod admin;
 mod app;
 mod capture;
+mod datafiles;
 mod theme;
 
 use std::path::PathBuf;
@@ -13,10 +14,9 @@ use std::path::PathBuf;
 use anyhow::{bail, Context, Result};
 use clap::Parser;
 use hollow_proto::export::{export, ExportSettings};
-use hollow_proto::gamedata::GameData;
 use hollow_proto::{Event, SessionState};
 
-use crate::capture::{Accumulator, CaptureConfig, CaptureEvent, CaptureSession, Source};
+use crate::capture::{Accumulator, Backend, CaptureConfig, CaptureEvent, CaptureSession, Source};
 
 #[derive(Parser, Debug)]
 #[command(name = "hollow-archive", version, about)]
@@ -24,6 +24,10 @@ struct Cli {
     /// Game region: Europe, America, Asia, or "TW,HK,MO". Remembered by the GUI.
     #[arg(long)]
     region: Option<String>,
+
+    /// Packet capture backend (pktmon needs no driver; pcap needs Npcap and a `--features pcap` build).
+    #[arg(long = "capture-backend", value_enum)]
+    capture_backend: Option<Backend>,
 
     /// Replay a recording (.pcapng from pktmon/Wireshark, or zzz_packet_capture's .json)
     /// instead of capturing live.
@@ -49,6 +53,10 @@ struct Cli {
     /// Pad every disc to four substats with empty keys, like zzz_packet_capture.
     #[arg(long)]
     pad_substats: bool,
+
+    /// Start capturing as soon as the window opens.
+    #[arg(long)]
+    autostart: bool,
 
     /// Do not try to relaunch as administrator.
     #[arg(long)]
@@ -81,15 +89,26 @@ fn main() -> Result<()> {
 fn gui(cli: Cli) -> Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([440.0, 700.0])
-            .with_min_inner_size([380.0, 520.0])
+            .with_inner_size([860.0, 520.0])
+            .with_min_inner_size([760.0, 480.0])
+            .with_decorations(false)
             .with_title("Hollow Archive"),
+        persist_window: false,
         ..Default::default()
     };
     eframe::run_native(
         "Hollow Archive",
         options,
-        Box::new(move |cc| Ok(Box::new(app::App::new(cc, cli.region, cli.fixture, cli.record)))),
+        Box::new(move |cc| {
+            Ok(Box::new(app::App::new(
+                cc,
+                cli.region,
+                cli.capture_backend,
+                cli.fixture,
+                cli.record,
+                cli.autostart,
+            )))
+        }),
     )
     .map_err(|e| anyhow::anyhow!("{e}"))
 }
@@ -98,16 +117,16 @@ fn headless(cli: Cli) -> Result<()> {
     let region = cli.region.unwrap_or_else(|| "America".into());
     let source = match &cli.fixture {
         Some(p) => Source::Fixture(p.clone()),
-        #[cfg(windows)]
-        None => Source::Pktmon,
-        #[cfg(not(windows))]
-        None => bail!("live capture is only supported on Windows; pass --fixture"),
+        None => Source::Live(cli.capture_backend.unwrap_or(Backend::Pktmon)),
     };
-    eprintln!("region {region}, source {source:?}");
+    let data = std::sync::Arc::new(datafiles::load());
+    eprintln!("region {region}, source {source:?}, data files {}", data.version);
+    let gamedata = data.gamedata.clone();
     let session = CaptureSession::start(CaptureConfig {
         region,
         source,
         record_to: cli.record,
+        data,
     });
     let mut acc = Accumulator::default();
     let mut state = SessionState::Initial;
@@ -175,7 +194,7 @@ fn headless(cli: Cli) -> Result<()> {
             pad_substats: cli.pad_substats,
             ..Default::default()
         };
-        let json = serde_json::to_string_pretty(&export(&acc.data, &GameData::vendored(), &settings))?;
+        let json = serde_json::to_string_pretty(&export(&acc.data, &gamedata, &settings))?;
         if out.as_os_str() == "-" {
             println!("{json}");
         } else {
