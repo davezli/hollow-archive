@@ -24,8 +24,8 @@ Resolved 2026-09-18 by reading `zzz_packet_capture` (master, game 3.2) and
 
 - Does Zenless Optimizer accept `substats` with fewer than 4 entries? (D5,
   T-E2E-3.) The reference pads to 4 with empty keys.
-- Is the pktmon `Packet.payload` a full Ethernet frame on every Windows build?
-  (risk 2, T-I2.)
+- ~~Is the pktmon `Packet.payload` a full Ethernet frame on every Windows build?~~
+  Verified on Windows 11 (live run 2026-09-18); Windows 10 untested.
 - Ec2b/dispatch live seed derivation — deferred to v1.1; region seed table
   covers all four live regions for 3.2.
 

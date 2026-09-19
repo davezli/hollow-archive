@@ -448,9 +448,9 @@ backends are Windows-gated.
 | M0 | Workspace scaffold, CI (fmt/clippy/test on ubuntu + windows), vendored data files, LICENSE attributions | `cargo test` green with placeholder tests |
 | M0.5 ✅ | Record `3.2-<region>-fresh.pcapng` with `pktmon` (§3.4) before writing decode code | Done 2026-09-18: 20 797 datagrams, 0 drops, America |
 | M1 ✅ | `hollow-proto`: kcp, envelope, xorpad, cs_random, rsa, session, wire, schema XOR, decode, pipeline, frame, pcapng/json fixture I/O | Done 2026-09-18: 46 unit + 5 replay tests; the recording decodes to 39/114/506 and the ZOD export is set-identical to the reference tool's export of the same account |
-| M2 | `hollow-archive --fixture x.pcapng` (done) and live capture via pktmon (todo) | Live capture on Windows produces `SessionEstablished` + all three data events during one login |
+| M2 ✅ | `hollow-archive --fixture x.pcapng` and live capture via pktmon | Done 2026-09-18: live session on Win 11 went IDLE→DONE and its export is identical to the fixture replay |
 | M3 ✅ (export) | `export.rs` + nanoka game data + settings — landed in `hollow-proto` rather than the app crate so the CLI and tests can use it | Golden test passes against the reference export; import into Zenless Optimizer still to be confirmed by hand (T-E2E-3) |
-| M4 | egui UI: status/phase banner, counts, export panel (copy/save), error surfaces, region picker, data-file update prompt, theme | First-run walkthrough in testing.md §5 passes without consulting docs |
+| M4 ✅ (mostly) | egui UI: status/phase banner, counts, export panel (copy/save), error surfaces, region picker, theme | Done 2026-09-18 except the data-file update prompt (moved to M5). Owner completed a live run without docs. |
 | M5 | Polish: self-update check, persisted settings, log panel, `pcap` fallback build | Release candidate |
 
 Deferred (tracked, not scheduled): Ec2b live seed derivation; materials export;
@@ -470,10 +470,10 @@ the game is exactly the anti-cheat exposure D9 rules out for an end-user tool.
 1. **Upstream data-file dependency** (§1.9). Mitigation: vendored fallback,
    loud "data files are for 3.2, game is 3.3" banner, and `datamine.json` is small
    enough to maintain by hand if needed — `nap.json` (XOR table) is the hard one.
-2. **pktmon frame format.** irminsul never parses frames itself; if `pktmon`'s
-   `Packet.payload` is already UDP payload on some Windows builds, `frame.rs`
-   must detect and pass through (check first bytes for a KCP header vs Ethernet
-   ethertype). Test on Win 11 24H2+ and Win 10 22H2.
+2. **pktmon frame format.** Resolved for Windows 11 (2026-09-18): the `pktmon`
+   crate tags payloads (`Ethernet`/`IP`/`UDP`) and `capture.rs` strips each
+   accordingly; the same packet arrives once per NDIS component, so the first
+   component id seen is locked in. Windows 10 22H2 still untested.
 3. **Timestamp-seeded brute force** depends on the *capture* timestamp being
    within ±5 s of the client's clock. pktmon timestamps are host-clock, same
    machine as the client → fine. Fixture replay must use the *recorded* timestamp,
