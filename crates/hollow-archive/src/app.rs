@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::capture::{Accumulator, Backend, CaptureConfig, CaptureEvent, CaptureSession, Source};
 use crate::datafiles::{self, DataSet, UpdateStatus};
 use crate::theme;
+use crate::update::{self, AppUpdate};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Phase {
@@ -122,6 +123,8 @@ pub struct App {
     update: UpdateStatus,
     update_rx: Option<Receiver<UpdateStatus>>,
     reload_data_when_idle: bool,
+    app_update: AppUpdate,
+    app_update_rx: Option<Receiver<AppUpdate>>,
 }
 
 const SETTINGS_KEY: &str = "settings";
@@ -174,6 +177,12 @@ impl App {
             update: UpdateStatus::UpToDate,
             update_rx,
             reload_data_when_idle: false,
+            app_update: AppUpdate::UpToDate,
+            app_update_rx: if cfg!(debug_assertions) {
+                None
+            } else {
+                Some(update::check_in_background())
+            },
         };
         app.log(format!(
             "data files {} ({})",
@@ -240,6 +249,23 @@ impl App {
     }
 
     fn pump(&mut self, ctx: &egui::Context) {
+        // App self-update check / install.
+        if let Some(rx) = &self.app_update_rx {
+            if let Ok(status) = rx.try_recv() {
+                self.app_update_rx = None;
+                match &status {
+                    AppUpdate::Available(v) => self.log(format!("Hollow Archive v{v} is available")),
+                    AppUpdate::Installed(v) => {
+                        self.log(format!("updated to v{v}; restart to use it"));
+                        self.toast(ctx, format!("Updated to v{v} — restart Hollow Archive to finish."));
+                    }
+                    AppUpdate::Failed(e) => self.log(format!("warning: app update: {e}")),
+                    _ => {}
+                }
+                self.app_update = status;
+            }
+        }
+
         // Data-file update check / install.
         if let Some(rx) = &self.update_rx {
             if let Ok(status) = rx.try_recv() {
@@ -768,40 +794,69 @@ impl App {
                     .small()
                     .color(theme::MUTED),
             );
-            ui.with_layout(Layout::right_to_left(Align::Center), |ui| match self.update.clone() {
-                UpdateStatus::Available(v) => {
-                    let btn = egui::Button::new(
-                        RichText::new(format!("{} Update to {v}", ic::ICON_SYSTEM_UPDATE_ALT))
-                            .small()
-                            .color(theme::INK),
-                    )
-                    .fill(theme::AMBER)
-                    .stroke(egui::Stroke::NONE);
-                    if ui
-                        .add(btn)
-                        .on_hover_text("Download the latest datamine/schema/name tables")
-                        .clicked()
-                    {
-                        self.update = UpdateStatus::Downloading(v.clone());
-                        self.update_rx = Some(datafiles::install_in_background());
+            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                match self.app_update.clone() {
+                    AppUpdate::Available(v) => {
+                        let btn = egui::Button::new(
+                            RichText::new(format!("{} v{v}", ic::ICON_UPGRADE))
+                                .small()
+                                .color(theme::INK),
+                        )
+                        .fill(theme::AMBER)
+                        .stroke(egui::Stroke::NONE);
+                        if ui
+                            .add(btn)
+                            .on_hover_text("Download and install the new version")
+                            .clicked()
+                        {
+                            self.app_update = AppUpdate::Installing(v.clone());
+                            self.app_update_rx = Some(update::install_in_background());
+                        }
                     }
+                    AppUpdate::Installing(v) => {
+                        ui.label(RichText::new(format!("installing v{v}…")).small().color(theme::AMBER));
+                        ui.ctx().request_repaint_after(Duration::from_millis(300));
+                    }
+                    AppUpdate::Installed(_) => {
+                        ui.label(RichText::new("restart to finish update").small().color(theme::TEAL));
+                    }
+                    _ => {}
                 }
-                UpdateStatus::Downloading(v) => {
-                    ui.label(RichText::new(format!("downloading {v}…")).small().color(theme::AMBER));
-                    ui.ctx().request_repaint_after(Duration::from_millis(300));
+                match self.update.clone() {
+                    UpdateStatus::Available(v) => {
+                        let btn = egui::Button::new(
+                            RichText::new(format!("{} Update to {v}", ic::ICON_SYSTEM_UPDATE_ALT))
+                                .small()
+                                .color(theme::INK),
+                        )
+                        .fill(theme::AMBER)
+                        .stroke(egui::Stroke::NONE);
+                        if ui
+                            .add(btn)
+                            .on_hover_text("Download the latest datamine/schema/name tables")
+                            .clicked()
+                        {
+                            self.update = UpdateStatus::Downloading(v.clone());
+                            self.update_rx = Some(datafiles::install_in_background());
+                        }
+                    }
+                    UpdateStatus::Downloading(v) => {
+                        ui.label(RichText::new(format!("downloading {v}…")).small().color(theme::AMBER));
+                        ui.ctx().request_repaint_after(Duration::from_millis(300));
+                    }
+                    UpdateStatus::Installed(_) if self.session.is_some() => {
+                        ui.label(
+                            RichText::new("update applies after capture")
+                                .small()
+                                .color(theme::MUTED),
+                        );
+                    }
+                    UpdateStatus::Failed(_) => {
+                        ui.label(RichText::new("data check failed").small().color(theme::MUTED))
+                            .on_hover_text("See the capture log");
+                    }
+                    _ => {}
                 }
-                UpdateStatus::Installed(_) if self.session.is_some() => {
-                    ui.label(
-                        RichText::new("update applies after capture")
-                            .small()
-                            .color(theme::MUTED),
-                    );
-                }
-                UpdateStatus::Failed(_) => {
-                    ui.label(RichText::new("update check failed").small().color(theme::MUTED))
-                        .on_hover_text("See the capture log");
-                }
-                _ => {}
             });
         });
     }

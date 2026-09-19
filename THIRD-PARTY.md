@@ -14,8 +14,9 @@ following projects. Their licenses apply to the corresponding parts.
 | [Oswald](https://github.com/googlefonts/OswaldFont) | SIL OFL 1.1 | Display font (`crates/hollow-archive/assets/Oswald.ttf`, license alongside) |
 | [Material Icons](https://github.com/google/material-design-icons) via `egui_material_icons` | Apache-2.0 | UI icons |
 
-The optional hero artwork is a Zenless Zone Zero asset (HoYoverse) and is not
-distributed with this repository.
+The hero artwork (`crates/hollow-archive/assets/hero.png`) is the Inter-Knot
+post "A new Hollow on Fourteenth Street" from Zenless Zone Zero, © HoYoverse,
+used here as a non-commercial fan-project backdrop. It will be removed on request.
 
 Zenless Zone Zero is a trademark of HoYoverse / COGNOSPHERE. This project is
 not affiliated with or endorsed by them.

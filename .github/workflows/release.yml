@@ -1,0 +1,30 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release -p hollow-archive
+      - name: Package
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart("v")
+          $name = "hollow-archive-$ver-x86_64-pc-windows-msvc"
+          New-Item -ItemType Directory $name | Out-Null
+          Copy-Item target/release/hollow-archive.exe $name/
+          Copy-Item README.md, LICENSE-MIT, LICENSE-APACHE, THIRD-PARTY.md $name/
+          Compress-Archive -Path "$name/*" -DestinationPath "$name.zip"
+          Copy-Item target/release/hollow-archive.exe "hollow-archive-$ver.exe"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            hollow-archive-*-x86_64-pc-windows-msvc.zip
+            hollow-archive-*.exe
+          generate_release_notes: true

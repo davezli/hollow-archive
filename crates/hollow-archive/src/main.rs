@@ -8,6 +8,7 @@ mod app;
 mod capture;
 mod datafiles;
 mod theme;
+mod update;
 
 use std::path::PathBuf;
 

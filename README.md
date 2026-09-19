@@ -22,9 +22,18 @@ Windows 10/11 only. Uses the built-in `pktmon` driver, so no Npcap install.
 Data files (packet schema, ID→name tables) update in-app when a new game version
 ships upstream; the footer shows an **Update** button when one is available.
 
-The hero art (`crates/hollow-archive/assets/hero.png`, the Inter-Knot "A new
-Hollow on Fourteenth Street" post) is a ZZZ/Wikia asset and is not committed;
-without it the app draws a plain backdrop. Confirm licensing before shipping it.
+The app checks GitHub releases on launch and offers a one-click update in the
+footer (restart to finish).
+
+The hero art (`crates/hollow-archive/assets/hero.png`) is the in-game Inter-Knot
+post "A new Hollow on Fourteenth Street" (© HoYoverse), used as a fan-project
+backdrop; if you remove the file the app draws a plain backdrop instead.
+
+## Release
+
+Tag `vX.Y.Z` (matching the workspace version in `Cargo.toml`) and push it; the
+`release` workflow builds the Windows exe, zips it, and publishes a GitHub
+release that the in-app updater picks up.
 
 ## Develop
 

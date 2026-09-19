@@ -451,7 +451,7 @@ backends are Windows-gated.
 | M2 ✅ | `hollow-archive --fixture x.pcapng` and live capture via pktmon | Done 2026-09-18: live session on Win 11 went IDLE→DONE and its export is identical to the fixture replay |
 | M3 ✅ (export) | `export.rs` + nanoka game data + settings — landed in `hollow-proto` rather than the app crate so the CLI and tests can use it | Golden test passes against the reference export; import into Zenless Optimizer still to be confirmed by hand (T-E2E-3) |
 | M4 ✅ (mostly) | egui UI: status/phase banner, counts, export panel (copy/save), error surfaces, region picker, theme | Done 2026-09-18 except the data-file update prompt (moved to M5). Owner completed a live run without docs. |
-| M5 ✅ (partial) | Data-file auto-update from upstream + nanoka (`datafiles.rs`, verified against live upstream 2026-09-18), persisted settings, log panel, save-capture toggle, `pcap` fallback behind a feature flag (compiles against Npcap SDK 1.15; not run-tested), irminsul-style frameless UI with hero art. **Not done:** self-update of the exe (needs a GitHub release to point at). | Release candidate once a repo/release exists |
+| M5 ✅ (partial) | Data-file auto-update from upstream + nanoka (`datafiles.rs`, verified against live upstream 2026-09-18), persisted settings, log panel, save-capture toggle, `pcap` fallback behind a feature flag (compiles against Npcap SDK 1.15; not run-tested), irminsul-style frameless UI with hero art. Exe self-update via GitHub releases (`update.rs` + `release.yml`, added 2026-09-19). | Released as v3.2.0 |
 
 Deferred (tracked, not scheduled): Ec2b live seed derivation; materials export;
 running [GracefulDumper](https://github.com/AleXu224/GracefulDumper) ourselves
