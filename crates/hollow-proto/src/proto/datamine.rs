@@ -65,6 +65,12 @@ pub struct DiscInfoFields {
     pub main_stat: u32,
     #[serde(rename = "subStats")]
     pub sub_stats: u32,
+    /// Not in upstream datamine.json; found by inspecting captures (bool, set when locked). 0 = unknown.
+    #[serde(default)]
+    pub lock: u32,
+    /// Not in upstream datamine.json; the in-game "discard" tag. 0 = unknown.
+    #[serde(default)]
+    pub trash: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -74,6 +80,9 @@ pub struct WeaponInfoFields {
     pub level: u32,
     pub phase: u32,
     pub modification: u32,
+    /// Not in upstream datamine.json; found by inspecting captures. 0 = unknown.
+    #[serde(default)]
+    pub lock: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -136,6 +145,7 @@ mod tests {
     fn vendored_is_sane() {
         let d = Datamine::vendored();
         assert_eq!(d.cmd_player_get_token_sc_rsp, 4937);
+        assert_eq!((d.disc_info.lock, d.disc_info.trash, d.weapon_info.lock), (5, 7, 9));
         assert_eq!(d.region_seed("America").unwrap(), 0x50C2_1982_AC00_9AF2);
         assert_eq!(d.region_seed("tw,hk,mo").unwrap(), d.region_seed("TWHKMO").unwrap());
         assert!(d.region_seed("Mars").is_err());

@@ -37,7 +37,9 @@
         "id": 6,
         "level": 1,
         "mainStat": 9,
-        "subStats": 4
+        "subStats": 4,
+        "lock": 5,
+        "trash": 7
     },
     "discStat": {
         "key": 3,
@@ -52,6 +54,7 @@
         "uid": 6,
         "level": 1,
         "phase": 12,
-        "modification": 2
+        "modification": 2,
+        "lock": 9
     }
 }

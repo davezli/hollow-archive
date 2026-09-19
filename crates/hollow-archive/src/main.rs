@@ -93,6 +93,7 @@ fn gui(cli: Cli) -> Result<()> {
             .with_inner_size([860.0, 520.0])
             .with_min_inner_size([760.0, 480.0])
             .with_decorations(false)
+            .with_icon(eframe::icon_data::from_png_bytes(include_bytes!("../assets/icon.png")).expect("valid icon.png"))
             .with_title("Hollow Archive"),
         persist_window: false,
         ..Default::default()

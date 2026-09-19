@@ -205,6 +205,61 @@ impl Pipeline {
     }
 }
 
+/// Debug variant of [`Pipeline`] that hands back decrypted, un-XORed top-level
+/// fields for every message instead of decoding them. Used by examples/tools.
+pub struct RawPipeline {
+    incoming: kcp::Stream,
+    outgoing: kcp::Stream,
+    session: Session,
+    dm: Datamine,
+    schema: Schema,
+}
+
+impl RawPipeline {
+    pub fn new(initial_seed: u64, dm: Datamine, schema: Schema) -> Self {
+        Self {
+            incoming: kcp::Stream::default(),
+            outgoing: kcp::Stream::default(),
+            session: Session::new(initial_seed),
+            dm,
+            schema,
+        }
+    }
+
+    pub fn feed_raw(&mut self, payload: &[u8], dir: Direction, unix_secs: i64) -> Vec<(u16, Vec<wire::Field>)> {
+        let stream = match dir {
+            Direction::Incoming => &mut self.incoming,
+            Direction::Outgoing => &mut self.outgoing,
+        };
+        let mut out = Vec::new();
+        for m in stream.feed(payload) {
+            let Some(env) = envelope::parse(&m) else { continue };
+            let cmd_id = env.header.cmd_id;
+            let body = env.body;
+            match self.session.state() {
+                SessionState::Initial => {
+                    if cmd_id == self.dm.cmd_player_get_token_sc_rsp {
+                        let dec = self.session.decrypt(body);
+                        let _ = self.session.extract_server_rand_key(&dec);
+                    }
+                    continue;
+                }
+                SessionState::HaveServerKey => {
+                    if body.len() < MIN_BRUTE_FORCE_BODY || self.session.derive_session_key(body, unix_secs).is_none() {
+                        continue;
+                    }
+                }
+                SessionState::Established => {}
+            }
+            if let Ok(mut fields) = wire::parse(&self.session.decrypt(body)) {
+                self.schema.unxor_cmd(cmd_id, &mut fields);
+                out.push((cmd_id, fields));
+            }
+        }
+        out
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -320,7 +375,8 @@ mod tests {
                 uid: 3,
                 level: 10,
                 phase: 0,
-                modification: 0
+                modification: 0,
+                lock: false
             }])]
         );
 

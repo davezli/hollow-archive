@@ -49,6 +49,8 @@ pub struct WEngine {
     pub level: u32,
     pub phase: u32,
     pub modification: u32,
+    #[serde(default)]
+    pub lock: bool,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -67,6 +69,11 @@ pub struct DriveDisc {
     pub level: u32,
     pub main_stat: DiscStat,
     pub sub_stats: Vec<DiscStat>,
+    #[serde(default)]
+    pub lock: bool,
+    /// Tagged for discard in-game.
+    #[serde(default)]
+    pub trash: bool,
 }
 
 impl DriveDisc {

@@ -61,11 +61,15 @@ fn canonical(z: &Zod) -> Vec<String> {
         out.push(serde_json::to_string(c).unwrap());
     }
     for w in z.wengines.iter().flatten() {
-        out.push(serde_json::to_string(w).unwrap());
+        let mut w = w.clone();
+        w.lock = false; // reference never detects lock
+        out.push(serde_json::to_string(&w).unwrap());
     }
     for d in z.discs.iter().flatten() {
         let mut d = d.clone();
         d.substats.retain(|s| !s.key.is_empty()); // reference pads to 4 empties
+        d.lock = false; // reference never detects lock/trash
+        d.trash = false;
         out.push(serde_json::to_string(&d).unwrap());
     }
     out.sort();

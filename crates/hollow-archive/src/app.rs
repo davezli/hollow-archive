@@ -726,8 +726,9 @@ impl App {
             self.toast(ui.ctx(), "Copied — paste into Zenless Optimizer's import.");
         }
         if save {
+            let name = format!("zzz_export_{}.json", chrono::Local::now().format("%Y-%m-%d_%H-%M"));
             if let Some(path) = rfd::FileDialog::new()
-                .set_file_name("zenless-optimizer.json")
+                .set_file_name(name)
                 .add_filter("JSON", &["json"])
                 .save_file()
             {

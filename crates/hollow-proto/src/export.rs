@@ -242,8 +242,8 @@ pub fn export(data: &PlayerData, gd: &GameData, s: &ExportSettings) -> Zod {
                     rarity: rarity_key(d.rarity()).to_string(),
                     main_stat_key: stat_key(d.main_stat.key).unwrap_or("").to_string(),
                     location: disc_loc.get(&d.uid).cloned().unwrap_or_default(),
-                    lock: false,
-                    trash: false,
+                    lock: d.lock,
+                    trash: d.trash,
                     substats,
                 }
             })
@@ -263,7 +263,7 @@ pub fn export(data: &PlayerData, gd: &GameData, s: &ExportSettings) -> Zod {
                 modification: w.modification,
                 phase: w.phase,
                 location: engine_loc.get(&w.uid).cloned().unwrap_or_default(),
-                lock: false,
+                lock: w.lock,
                 id: format!("zzz_wengine_{}", w.uid),
             })
             .collect()
@@ -324,6 +324,7 @@ mod tests {
                     level: 30,
                     phase: 5,
                     modification: 2,
+                    lock: true,
                 },
                 WEngine {
                     id: 12001,
@@ -331,6 +332,7 @@ mod tests {
                     level: 1,
                     phase: 1,
                     modification: 1,
+                    lock: false,
                 },
             ],
             discs: vec![
@@ -348,6 +350,8 @@ mod tests {
                         base_value: 1,
                         add_value: 1,
                     }],
+                    lock: true,
+                    trash: false,
                 },
                 DriveDisc {
                     uid: 101,
@@ -359,6 +363,8 @@ mod tests {
                         add_value: 0,
                     },
                     sub_stats: vec![],
+                    lock: false,
+                    trash: true,
                 },
             ],
         }
@@ -387,13 +393,16 @@ mod tests {
                 upgrades: 1
             }]
         );
+        assert!(d.lock && !d.trash);
         assert_eq!(z.discs.as_ref().unwrap()[1].location, "");
+        assert!(!z.discs.as_ref().unwrap()[1].lock && z.discs.as_ref().unwrap()[1].trash);
 
         let w = &z.wengines.as_ref().unwrap()[0];
         assert_eq!(
             (w.key.as_str(), w.location.as_str(), w.id.as_str()),
             ("LunarPleniluna", "Anby", "zzz_wengine_7")
         );
+        assert!(w.lock);
         assert_eq!(z.wengines.as_ref().unwrap()[1].location, "");
     }
 

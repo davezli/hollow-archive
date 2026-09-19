@@ -49,6 +49,11 @@ fn u32_field(fields: &[Field], number: u32) -> u32 {
         .unwrap_or(0) as u32
 }
 
+/// Field number 0 means "unmapped" and always reads false.
+fn bool_field(fields: &[Field], number: u32) -> bool {
+    number != 0 && u32_field(fields, number) != 0
+}
+
 pub fn agent(dm: &Datamine, f: &[Field]) -> Agent {
     let a = &dm.agent_info;
     Agent {
@@ -80,6 +85,7 @@ pub fn wengine(dm: &Datamine, f: &[Field]) -> WEngine {
         level: u32_field(f, w.level),
         phase: u32_field(f, w.phase),
         modification: u32_field(f, w.modification),
+        lock: bool_field(f, w.lock),
     }
 }
 
@@ -103,6 +109,8 @@ pub fn disc(dm: &Datamine, f: &[Field]) -> DriveDisc {
             .map(|s| disc_stat(dm, &s))
             .unwrap_or_default(),
         sub_stats: nested(f, d.sub_stats).map(|s| disc_stat(dm, &s)).collect(),
+        lock: bool_field(f, d.lock),
+        trash: bool_field(f, d.trash),
     }
 }
 
@@ -131,6 +139,12 @@ mod tests {
                 message(d.main_stat, &[varint(s.key, 20103), varint(s.base_value, 1)]),
                 varint(99, 7), // unknown field, ignored
             ];
+            if n == 2 {
+                inner.push(varint(d.lock, 1));
+            }
+            if n == 3 {
+                inner.push(varint(d.trash, 1));
+            }
             inner.extend((0..n).map(|i| stat(11102 + i, i)));
             fields.push(message(dm.equip_data.discs, &inner));
         }
@@ -152,6 +166,9 @@ mod tests {
         );
         assert_eq!(discs[1].main_stat.key, 20103);
         assert_eq!((discs[1].uid, discs[1].id, discs[1].level), (1003, 31543, 15));
+        assert_eq!((discs[0].lock, discs[0].trash), (true, false));
+        assert_eq!((discs[1].lock, discs[1].trash), (false, true));
+        assert_eq!((discs[2].lock, discs[2].trash), (false, false));
     }
 
     #[test]
@@ -203,6 +220,7 @@ mod tests {
                 varint(w.level, 60),
                 varint(w.phase, 5),
                 varint(w.modification, 5),
+                varint(w.lock, 1),
             ],
         );
         let Some(Decoded::WEngines(ws)) = decode(&dm, dm.cmd_get_weapon_data_sc_rsp, &[wmsg]) else {
@@ -215,7 +233,8 @@ mod tests {
                 uid: 77,
                 level: 60,
                 phase: 5,
-                modification: 5
+                modification: 5,
+                lock: true
             }]
         );
     }

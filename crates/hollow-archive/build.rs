@@ -1,6 +1,7 @@
 fn main() {
     println!("cargo::rustc-check-cfg=cfg(hero_image)");
     println!("cargo:rerun-if-changed=assets/hero.png");
+    println!("cargo:rerun-if-changed=assets/icon.ico");
     if std::path::Path::new("assets/hero.png").exists() {
         println!("cargo:rustc-cfg=hero_image");
     }
@@ -8,6 +9,7 @@ fn main() {
         let mut res = winresource::WindowsResource::new();
         res.set("ProductName", "Hollow Archive");
         res.set("FileDescription", "Zenless Zone Zero inventory exporter");
+        res.set_icon("assets/icon.ico");
         res.compile().expect("windows resource");
     }
 }

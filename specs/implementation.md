@@ -188,6 +188,13 @@ pub struct DriveDisc  { uid: u32, id: u32, level: u32, main_stat: DiscStat, sub_
 pub struct DiscStat   { key: u32, base_value: u32, add_value: u32 }  // add_value == roll count for substats
 ```
 
+Three `bool` fields on discs and two on W-Engines are absent from upstream's
+`datamine.json`; found by inspecting captures against `nap.json` types
+(2026-09-19): disc **5** = lock, **7** = discard tag ("trash"), 10 = probably
+"new/unviewed"; W-Engine **9** = lock, 4 = probably "viewed". Our vendored
+`datamine.json` carries `discInfo.lock/trash` and `weaponInfo.lock` as extra
+optional keys; upstream files without them decode with the flags off.
+
 Drive disc `id` encodes everything: `rarity = id/10%10 + 1` (3=B,4=A,5=S),
 `slot = id % 10` (1–6), `set = id/100*100`. Substats present on the wire are
 exactly the activated ones; the reference pads the export to 4 entries with empty
