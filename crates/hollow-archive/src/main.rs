@@ -5,6 +5,7 @@
 
 mod admin;
 mod app;
+mod browser;
 mod capture;
 mod datafiles;
 mod theme;

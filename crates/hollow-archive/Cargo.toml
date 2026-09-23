@@ -3,7 +3,7 @@ name = "hollow-archive"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Zenless Zone Zero inventory exporter (packet capture) for Zenless Optimizer"
+description = "Zenless Zone Zero inventory exporter (packet capture) for kayco.app Drive Disc Triage and Zenless Optimizer"
 
 [dependencies]
 hollow-proto = { path = "../hollow-proto" }

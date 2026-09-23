@@ -17,6 +17,10 @@ use crate::datafiles::{self, DataSet, UpdateStatus};
 use crate::theme;
 use crate::update::{self, AppUpdate};
 
+/// Drive Disc Triage on kayco.app, the web tool built on this exporter's output.
+/// `from` makes the page open its import box and offer a clipboard paste.
+const TRIAGE_URL: &str = "https://kayco.app/zzz/disc-triage?from=hollow-archive";
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Phase {
     Idle,
@@ -644,10 +648,12 @@ impl App {
         } else {
             "Nothing captured yet".to_string()
         };
+        let has_discs = !d.discs.is_empty();
         let mut copy = false;
         let mut save = false;
         let mut toggle = false;
-        Self::heading(ui, "Zenless Optimizer", |ui| {
+        let mut triage = false;
+        Self::heading(ui, "Export", |ui| {
             if theme::icon_button(ui, ic::ICON_TUNE, "Export filters").clicked() {
                 toggle = true;
             }
@@ -663,6 +669,28 @@ impl App {
         ui.horizontal(|ui| {
             ui.add_space(14.0);
             ui.label(RichText::new(summary).small().color(theme::MUTED));
+        });
+        ui.add_space(6.0);
+        ui.horizontal(|ui| {
+            ui.add_space(14.0);
+            ui.add_enabled_ui(has_discs, |ui| {
+                let btn = egui::Button::new(
+                    RichText::new(format!("{} Triage discs on kayco.app", ic::ICON_OPEN_IN_NEW))
+                        .small()
+                        .color(theme::INK),
+                )
+                .fill(theme::AMBER)
+                .stroke(egui::Stroke::NONE);
+                if ui
+                    .add(btn)
+                    .on_hover_text(
+                        "Copies the export and opens Drive Disc Triage, which sorts every disc into lock or discard",
+                    )
+                    .clicked()
+                {
+                    triage = true;
+                }
+            });
         });
 
         if toggle {
@@ -723,7 +751,20 @@ impl App {
         if copy {
             let json = self.export_json();
             ui.ctx().copy_text(json);
-            self.toast(ui.ctx(), "Copied — paste into Zenless Optimizer's import.");
+            self.toast(ui.ctx(), "Copied. Paste into Zenless Optimizer or kayco.app.");
+        }
+        if triage {
+            // The export travels by clipboard; the page only learns where the
+            // visitor came from, and opens its import box with a paste button.
+            let json = self.export_json();
+            ui.ctx().copy_text(json);
+            match crate::browser::open(TRIAGE_URL) {
+                Ok(()) => self.toast(ui.ctx(), "Copied. In the browser, press Paste from clipboard."),
+                Err(e) => self.toast(
+                    ui.ctx(),
+                    format!("Copied, but the browser did not open ({e}). Paste at kayco.app/zzz/disc-triage."),
+                ),
+            }
         }
         if save {
             let name = format!("zzz_export_{}.json", chrono::Local::now().format("%Y-%m-%d_%H-%M"));

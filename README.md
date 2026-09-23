@@ -1,8 +1,18 @@
 # Hollow Archive
 
-Exports your Zenless Zone Zero Agents, W-Engines and Drive Discs to
-[Zenless Optimizer](https://zzz.frzyc.com/) by watching the game's own login
-traffic. No game files are touched and nothing is injected into the game.
+Exports your Zenless Zone Zero Agents, W-Engines and Drive Discs by watching
+the game's own login traffic. No game files are touched and nothing is injected
+into the game.
+
+**What to do with the export:**
+
+- **[Drive Disc Triage](https://kayco.app/zzz/disc-triage)** on kayco.app sorts
+  every disc you own into *lock* or *discard*, checked against every agent on
+  your roster. One click from the app: **Triage discs on kayco.app**.
+- **[Zenless Optimizer](https://zzz.frzyc.com/)** builds optimal disc loadouts
+  per agent.
+- The rest of [kayco.app's ZZZ tools](https://kayco.app/) (Area Patrol
+  Recommender, Drive Disc Stat Guide, roster tracker) read the same file.
 
 Protocol handling is a Rust port of
 [AleXu224/zzz_packet_capture](https://github.com/AleXu224/zzz_packet_capture) (MIT),
@@ -15,8 +25,15 @@ whose `datamine.json` / `nap.json` we also consume. App shell modelled on
 2. Pick your region, press **Start capture**.
 3. Launch Zenless Zone Zero and log in. If the game is already open, log out to
    the title screen and back in.
-4. When the status reads **DONE**, press **Copy to clipboard** and paste into
-   Zenless Optimizer's import.
+4. When the status reads **DONE**, either:
+   - press **Triage discs on kayco.app**: it copies the export and opens
+     [Drive Disc Triage](https://kayco.app/zzz/disc-triage), where
+     **Paste from clipboard** imports it; or
+   - press **Copy to clipboard** (or **Save JSON file**) and paste into
+     Zenless Optimizer's import.
+
+The export goes by clipboard or file only. Nothing is uploaded by this app, and
+kayco.app processes it in your browser.
 
 Windows 10/11 only. Uses the built-in `pktmon` driver, so no Npcap install.
 Data files (packet schema, ID→name tables) update in-app when a new game version
