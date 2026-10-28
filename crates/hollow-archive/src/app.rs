@@ -396,7 +396,10 @@ impl App {
             self.log("auto-save failed: no folder to save into");
             return false;
         };
-        let path = dir.join(format!("zzz_export_{}.json", chrono::Local::now().format("%Y-%m-%d_%H-%M")));
+        let path = dir.join(format!(
+            "zzz_export_{}.json",
+            chrono::Local::now().format("%Y-%m-%d_%H-%M")
+        ));
         let result = std::fs::create_dir_all(&dir).and_then(|()| std::fs::write(&path, self.export_json()));
         match result {
             Ok(()) => {
@@ -635,13 +638,12 @@ impl App {
                 .corner_radius(3)
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    ui.checkbox(&mut self.settings.listen_on_launch, "Start listening when the app opens");
+                    ui.checkbox(
+                        &mut self.settings.listen_on_launch,
+                        "Start listening when the app opens",
+                    );
                     ui.checkbox(&mut self.settings.auto_save, "Save to file automatically when done")
-                        .on_hover_text(
-                            Self::exports_dir()
-                                .map(|d| d.display().to_string())
-                                .unwrap_or_default(),
-                        );
+                        .on_hover_text(Self::exports_dir().map(|d| d.display().to_string()).unwrap_or_default());
                     ui.add_enabled(
                         self.settings.auto_save,
                         egui::Checkbox::new(&mut self.settings.close_after_save, "Close the app after saving"),
