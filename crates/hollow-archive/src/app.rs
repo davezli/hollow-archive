@@ -95,6 +95,8 @@ pub struct Settings {
     pub backend: Backend,
     pub save_captures: bool,
     pub listen_on_launch: bool,
+    pub auto_save: bool,
+    pub close_after_save: bool,
     pub export: ExportSettings,
     pub show_log: bool,
 }
@@ -106,6 +108,8 @@ impl Default for Settings {
             backend: Backend::Pktmon,
             save_captures: false,
             listen_on_launch: false,
+            auto_save: false,
+            close_after_save: false,
             export: ExportSettings::default(),
             show_log: false,
         }
@@ -131,6 +135,7 @@ pub struct App {
     reload_data_when_idle: bool,
     app_update: AppUpdate,
     app_update_rx: Option<Receiver<AppUpdate>>,
+    close_requested: bool,
 }
 
 const SETTINGS_KEY: &str = "settings";
@@ -189,6 +194,7 @@ impl App {
             } else {
                 Some(update::check_in_background())
             },
+            close_requested: false,
         };
         app.log(format!(
             "data files {} ({})",
@@ -305,6 +311,9 @@ impl App {
         for ev in events {
             self.handle(ev);
         }
+        if self.close_requested {
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
         if finished {
             self.session = None;
             if self.phase.busy() {
@@ -346,9 +355,13 @@ impl App {
                             d.wengines.len(),
                             d.discs.len()
                         ));
-                        if self.acc.complete() {
+                        if self.acc.complete() && self.phase != Phase::Done {
                             self.phase = Phase::Done;
                             self.stop();
+                            if self.settings.auto_save {
+                                let saved = self.auto_save();
+                                self.close_requested = saved && self.settings.close_after_save;
+                            }
                         }
                     }
                 }
@@ -368,6 +381,31 @@ impl App {
                         _ => Phase::Idle,
                     };
                 }
+            }
+        }
+    }
+
+    fn exports_dir() -> Option<PathBuf> {
+        directories::UserDirs::new()
+            .and_then(|d| d.document_dir().map(|p| p.join("Hollow Archive")))
+            .or_else(|| datafiles::app_dir("exports"))
+    }
+
+    fn auto_save(&mut self) -> bool {
+        let Some(dir) = Self::exports_dir() else {
+            self.log("auto-save failed: no folder to save into");
+            return false;
+        };
+        let path = dir.join(format!("zzz_export_{}.json", chrono::Local::now().format("%Y-%m-%d_%H-%M")));
+        let result = std::fs::create_dir_all(&dir).and_then(|()| std::fs::write(&path, self.export_json()));
+        match result {
+            Ok(()) => {
+                self.log(format!("saved {}", path.display()));
+                true
+            }
+            Err(e) => {
+                self.log(format!("auto-save failed: {e}"));
+                false
             }
         }
     }
@@ -598,6 +636,16 @@ impl App {
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.checkbox(&mut self.settings.listen_on_launch, "Start listening when the app opens");
+                    ui.checkbox(&mut self.settings.auto_save, "Save to file automatically when done")
+                        .on_hover_text(
+                            Self::exports_dir()
+                                .map(|d| d.display().to_string())
+                                .unwrap_or_default(),
+                        );
+                    ui.add_enabled(
+                        self.settings.auto_save,
+                        egui::Checkbox::new(&mut self.settings.close_after_save, "Close the app after saving"),
+                    );
                     ui.add_enabled_ui(!busy, |ui| {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new("Region").color(theme::MUTED));
