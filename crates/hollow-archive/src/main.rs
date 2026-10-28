@@ -56,7 +56,7 @@ struct Cli {
     #[arg(long)]
     pad_substats: bool,
 
-    /// Start capturing as soon as the window opens.
+    /// Start capturing as soon as the window opens (overrides the saved setting).
     #[arg(long)]
     autostart: bool,
 

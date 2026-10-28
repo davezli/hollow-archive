@@ -94,6 +94,7 @@ pub struct Settings {
     pub region: String,
     pub backend: Backend,
     pub save_captures: bool,
+    pub listen_on_launch: bool,
     pub export: ExportSettings,
     pub show_log: bool,
 }
@@ -104,6 +105,7 @@ impl Default for Settings {
             region: "America".into(),
             backend: Backend::Pktmon,
             save_captures: false,
+            listen_on_launch: false,
             export: ExportSettings::default(),
             show_log: false,
         }
@@ -193,7 +195,7 @@ impl App {
             app.data.version,
             if app.data.from_cache { "downloaded" } else { "built-in" }
         ));
-        if autostart {
+        if autostart || app.settings.listen_on_launch {
             app.start();
         }
         app
@@ -595,6 +597,7 @@ impl App {
                 .corner_radius(3)
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
+                    ui.checkbox(&mut self.settings.listen_on_launch, "Start listening when the app opens");
                     ui.add_enabled_ui(!busy, |ui| {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new("Region").color(theme::MUTED));
